@@ -1,0 +1,993 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>미션 허브 — 체인저스캠퍼스</title>
+<link href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/variable/pretendardvariable-dynamic-subset.css" rel="stylesheet">
+<style>
+:root {
+  --bg: #0c0c0e;
+  --bg-elevated: #141416;
+  --bg-surface: #1a1a1e;
+  --card: #18181c;
+  --card-hover: #1e1e22;
+  --text: #f0f0f2;
+  --text-secondary: #a8a8b0;
+  --sub: #8a8a94;
+  --hint: #5a5a64;
+  --accent: #e8253a;
+  --accent-hover: #ff3348;
+  --accent-dark: #c41e30;
+  --accent-glow: rgba(232, 37, 58, 0.15);
+  --accent-border: rgba(232, 37, 58, 0.25);
+  --accent-surface: rgba(232, 37, 58, 0.08);
+  --green: #22c55e;
+  --green-dark: #16a34a;
+  --green-glow: rgba(34, 197, 94, 0.12);
+  --green-border: rgba(34, 197, 94, 0.25);
+  --green-surface: rgba(34, 197, 94, 0.06);
+  --red: #ef4444;
+  --red-surface: rgba(239, 68, 68, 0.08);
+  --amber: #f59e0b;
+  --amber-surface: rgba(245, 158, 11, 0.08);
+  --amber-border: rgba(245, 158, 11, 0.2);
+  --border: rgba(255,255,255,0.06);
+  --border-hover: rgba(255,255,255,0.1);
+  --border-strong: rgba(255,255,255,0.14);
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-xs: 8px;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.3), 0 0 0 1px rgba(255,255,255,0.03);
+  --shadow-md: 0 4px 16px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.04);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.5);
+  --shadow-accent: 0 4px 20px rgba(232, 37, 58, 0.3);
+  --shadow-green: 0 4px 20px rgba(34, 197, 94, 0.25);
+  --font: "Pretendard Variable", -apple-system, BlinkMacSystemFont, sans-serif;
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-med: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  line-height: 1.7;
+  -webkit-font-smoothing: antialiased;
+  min-height: 100vh;
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-repeat: repeat; background-size: 256px;
+  pointer-events: none; z-index: 0;
+}
+body::after {
+  content: '';
+  position: fixed; top: -120px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse at center, rgba(232,37,58,0.08) 0%, transparent 70%);
+  pointer-events: none; z-index: 0;
+}
+
+.page-wrap { max-width: 520px; margin: 0 auto; padding: 0 20px; position: relative; z-index: 1; }
+
+/* ============================
+   1. 브랜드 헤더
+   ============================ */
+.brand-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 28px 0 0;
+  animation: headerIn 0.5s ease both;
+}
+.brand-logo {
+  width: 120px; height: auto;
+  flex-shrink: 0;
+}
+.brand-logo img { width: 100%; height: auto; display: block; }
+.brand-name {
+  font-size: 17px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.header {
+  padding: 24px 0 28px;
+  text-align: center;
+  animation: headerIn 0.6s ease both;
+}
+@keyframes headerIn {
+  from { opacity: 0; transform: translateY(-10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.header h1 {
+  font-size: 28px; font-weight: 800; letter-spacing: -0.03em; line-height: 1.25; margin-bottom: 8px;
+  background: linear-gradient(135deg, #fff 60%, var(--text-secondary));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.header .subtitle { font-size: 14px; color: var(--sub); font-weight: 400; }
+
+/* ============================
+   2. 진행 단계 스텝퍼
+   ============================ */
+.stepper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 10px;
+  margin-bottom: 20px;
+  animation: cardIn 0.5s ease both;
+}
+.step {
+  display: flex; align-items: center; gap: 8px;
+  padding: 8px 14px;
+  border-radius: 20px;
+  transition: all 0.35s ease;
+}
+.step.active {
+  background: var(--accent-surface);
+  border: 1px solid var(--accent-border);
+}
+.step.done {
+  background: var(--green-surface);
+  border: 1px solid var(--green-border);
+}
+.step:not(.active):not(.done) {
+  border: 1px solid transparent;
+}
+.step-num {
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 800;
+  flex-shrink: 0;
+  transition: all 0.35s ease;
+  background: var(--bg-surface);
+  border: 1.5px solid var(--border-hover);
+  color: var(--hint);
+}
+.step.active .step-num {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: white;
+  box-shadow: 0 0 10px rgba(232,37,58,0.3);
+}
+.step.done .step-num {
+  background: var(--green);
+  border-color: var(--green);
+  color: white;
+}
+.step-text {
+  font-size: 12px; font-weight: 600;
+  color: var(--hint);
+  transition: color 0.35s ease;
+  white-space: nowrap;
+}
+.step.active .step-text { color: var(--accent); }
+.step.done .step-text { color: var(--green); }
+.step-arrow {
+  color: var(--hint);
+  font-size: 10px;
+  margin: 0 2px;
+  flex-shrink: 0;
+}
+
+/* ============================
+   3. 리워드 쿠폰 카드
+   ============================ */
+.reward-coupon {
+  position: relative;
+  animation: resultIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  margin: 0 -4px;
+}
+.coupon-card {
+  background: linear-gradient(145deg, #1a2e1a 0%, #0f1f0f 100%);
+  border: 1.5px solid var(--green-border);
+  border-radius: 20px;
+  overflow: hidden;
+  position: relative;
+}
+.coupon-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 50%; transform: translateX(-50%);
+  width: 300px; height: 160px;
+  background: radial-gradient(ellipse, rgba(34,197,94,0.12), transparent 70%);
+  pointer-events: none;
+}
+/* Perforated divider */
+.coupon-divider {
+  position: relative;
+  height: 1px;
+  margin: 0 20px;
+}
+.coupon-divider::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  border-top: 2px dashed rgba(34,197,94,0.2);
+}
+.coupon-divider .notch-left,
+.coupon-divider .notch-right {
+  position: absolute;
+  top: -12px;
+  width: 24px; height: 24px;
+  border-radius: 50%;
+  background: var(--bg);
+}
+.coupon-divider .notch-left { left: -32px; }
+.coupon-divider .notch-right { right: -32px; }
+
+.coupon-top {
+  text-align: center;
+  padding: 32px 24px 20px;
+  position: relative;
+  z-index: 1;
+}
+.coupon-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--green);
+  background: var(--green-surface);
+  border: 1px solid var(--green-border);
+  padding: 5px 14px;
+  border-radius: 20px;
+  margin-bottom: 16px;
+}
+.coupon-icon { font-size: 44px; margin-bottom: 12px; }
+.coupon-title {
+  font-size: 22px; font-weight: 800; color: var(--green);
+  margin-bottom: 4px; letter-spacing: -0.02em;
+}
+.coupon-desc {
+  font-size: 13px; color: var(--sub);
+}
+.coupon-status {
+  font-size: 14px; font-weight: 600; color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+.coupon-guide {
+  font-size: 12px; color: var(--sub);
+  margin-top: 8px;
+}
+
+.coupon-bottom {
+  padding: 20px 24px 28px;
+  text-align: center;
+  position: relative;
+  z-index: 1;
+}
+.btn-dl {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 52px; padding: 0 32px;
+  background: var(--green); color: white; border: none;
+  border-radius: var(--radius-xs);
+  font-family: var(--font); font-size: 15px; font-weight: 700;
+  cursor: pointer; text-decoration: none;
+  box-shadow: var(--shadow-green);
+  transition: all var(--transition-med);
+  position: relative;
+}
+.btn-dl::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.12) 0%, transparent 50%);
+  border-radius: var(--radius-xs);
+  pointer-events: none;
+}
+.btn-dl:hover {
+  background: var(--green-dark);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 24px rgba(34,197,94,0.35);
+}
+.btn-dl svg { width: 18px; height: 18px; }
+.coupon-footer-text {
+  margin-top: 16px;
+  font-size: 14px;
+  color: var(--sub);
+}
+
+/* ========== Notice Banner ========== */
+.notice-banner {
+  background: var(--amber-surface);
+  border: 1px solid var(--amber-border);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  margin-bottom: 16px;
+  display: none;
+  backdrop-filter: blur(8px);
+  animation: cardIn 0.4s ease both;
+}
+.notice-banner.show { display: block; }
+.notice-banner-head {
+  display: flex; align-items: center; gap: 6px;
+  font-size: 12px; font-weight: 800; color: var(--amber);
+  letter-spacing: 0.02em; margin-bottom: 8px;
+}
+.notice-banner-body { font-size: 13px; color: var(--text-secondary); line-height: 1.7; }
+.notice-confirm {
+  display: flex; align-items: center; gap: 8px;
+  margin-top: 12px; padding-top: 12px;
+  border-top: 1px solid var(--amber-border);
+  font-size: 13px; font-weight: 600; color: var(--amber);
+  cursor: pointer; user-select: none; transition: color var(--transition-fast);
+}
+.notice-confirm:hover { color: #fbbf24; }
+.notice-confirm input { accent-color: var(--amber); width: 16px; height: 16px; cursor: pointer; }
+
+/* ========== Card ========== */
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 32px 28px;
+  margin-bottom: 16px;
+  box-shadow: var(--shadow-sm);
+  transition: border-color var(--transition-med), box-shadow var(--transition-med);
+  animation: cardIn 0.5s ease both;
+  animation-delay: 0.1s;
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.step-label {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-size: 10px; font-weight: 800; letter-spacing: 0.08em;
+  text-transform: uppercase; padding: 5px 12px; border-radius: 20px;
+  margin-bottom: 20px;
+}
+.step-label.reward {
+  background: var(--accent-surface); color: var(--accent);
+  border: 1px solid var(--accent-border);
+}
+.card h2 { font-size: 22px; font-weight: 800; letter-spacing: -0.02em; margin-bottom: 8px; color: var(--text); }
+.card .desc { font-size: 14px; color: var(--sub); margin-bottom: 28px; line-height: 1.7; }
+
+/* ========== Form Fields ========== */
+.form-field { margin-bottom: 20px; }
+.form-label {
+  display: block; font-size: 13px; font-weight: 700;
+  color: var(--text-secondary); margin-bottom: 8px; letter-spacing: -0.01em;
+}
+.form-label .required { color: var(--accent); }
+.form-input {
+  width: 100%; height: 50px; padding: 0 16px;
+  border: 1.5px solid var(--border-hover); border-radius: var(--radius-xs);
+  font-family: var(--font); font-size: 14px; font-weight: 500;
+  outline: none; background: var(--bg-surface); color: var(--text);
+  transition: border-color var(--transition-med), background var(--transition-med), box-shadow var(--transition-med);
+}
+.form-input::placeholder { color: var(--hint); font-weight: 400; }
+.form-input:focus {
+  border-color: var(--accent); background: var(--bg-elevated);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.form-hint { font-size: 11px; color: var(--hint); margin-top: 6px; }
+
+/* ========== Radio Group ========== */
+.radio-group { display: flex; gap: 10px; }
+.radio-item {
+  flex: 1; display: flex; align-items: center; gap: 10px;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border-hover); border-radius: var(--radius-xs);
+  cursor: pointer; background: var(--bg-surface);
+  transition: all var(--transition-med);
+}
+.radio-item:hover { border-color: var(--border-strong); background: var(--card-hover); }
+.radio-item:has(input:checked) {
+  border-color: var(--accent); background: var(--accent-surface);
+  box-shadow: 0 0 0 3px var(--accent-glow);
+}
+.radio-item input { accent-color: var(--accent); width: 16px; height: 16px; cursor: pointer; }
+.radio-label {
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  color: var(--text-secondary); transition: color var(--transition-fast);
+}
+.radio-item:has(input:checked) .radio-label { color: var(--text); }
+
+/* ========== Submit Button ========== */
+.btn-submit {
+  width: 100%; height: 64px;
+  border: none; border-radius: var(--radius-xs);
+  background: var(--accent); color: white;
+  font-family: var(--font); font-size: 17px; font-weight: 800;
+  cursor: pointer; margin-top: 20px;
+  box-shadow: 0 4px 24px rgba(232, 37, 58, 0.4);
+  transition: all var(--transition-med);
+  position: relative; overflow: hidden; letter-spacing: -0.01em;
+}
+.btn-submit::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: linear-gradient(180deg, rgba(255,255,255,0.1) 0%, transparent 50%);
+  pointer-events: none;
+}
+.btn-submit:hover {
+  background: var(--accent-hover);
+  box-shadow: 0 8px 32px rgba(232,37,58,0.5);
+  transform: translateY(-2px);
+}
+.btn-submit:active { transform: translateY(0) scale(0.98); box-shadow: 0 2px 12px rgba(232,37,58,0.3); }
+.btn-submit:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+.btn-submit.notice-blocked { opacity: 0.35; cursor: not-allowed; }
+.form-error { font-size: 13px; color: var(--red); font-weight: 600; margin-top: 10px; text-align: center; display: none; }
+.form-error.show { display: block; }
+
+/* ========== Reward Preview Card ========== */
+.reward-preview {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-hover);
+  border-radius: var(--radius-sm);
+  padding: 16px 20px;
+  margin-bottom: 28px;
+}
+.reward-preview-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 8px 0;
+}
+.rp-icon { font-size: 18px; flex-shrink: 0; line-height: 1.4; }
+.rp-content { display: flex; flex-direction: column; gap: 2px; }
+.rp-label {
+  font-size: 13px; font-weight: 700; color: var(--text);
+}
+.rp-detail {
+  font-size: 12px; font-weight: 600; color: var(--green);
+}
+.reward-preview-row:last-child .rp-detail { color: var(--amber); }
+.reward-preview-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+
+/* ========== Fail Info Box (in form) ========== */
+.fail-info-box {
+  padding: 16px 18px; margin-bottom: 20px;
+  background: var(--accent-surface);
+  border: 1px solid var(--accent-border);
+  border-radius: var(--radius-xs);
+}
+.fail-info-title { font-size: 14px; font-weight: 700; color: var(--accent); margin-bottom: 4px; }
+.fail-info-desc { font-size: 13px; color: var(--text-secondary); line-height: 1.6; }
+
+/* ========== Diary 10 List ========== */
+.diary10-list { display: flex; flex-direction: column; gap: 8px; margin-top: 10px; margin-bottom: 10px; }
+.diary10-item { display: flex; align-items: center; gap: 8px; }
+.diary10-num {
+  width: 26px; height: 26px; flex-shrink: 0;
+  background: var(--bg-surface); border: 1px solid var(--border-hover);
+  border-radius: 6px; display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: var(--hint);
+}
+.diary10-input { flex: 1; height: 44px; font-size: 13px; }
+
+/* ========== Fail Result ========== */
+@keyframes resultIn {
+  from { opacity: 0; transform: translateY(16px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+.fail-result {
+  text-align: center; padding: 36px 24px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  animation: resultIn 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+}
+.fail-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+.fail-desc { font-size: 13px; color: var(--sub); }
+
+/* ========== Abuse Warning ========== */
+.abuse-warning {
+  margin-top: 20px; padding: 14px 18px;
+  background: var(--amber-surface);
+  border: 1px solid var(--amber-border);
+  border-radius: var(--radius-xs);
+  font-size: 12px; color: var(--amber); line-height: 1.6; text-align: center;
+}
+
+/* ========== FAQ ========== */
+.faq-section { margin-bottom: 32px; animation: cardIn 0.5s ease both; animation-delay: 0.2s; }
+.faq-title { font-size: 15px; font-weight: 700; margin-bottom: 12px; color: var(--text-secondary); }
+.faq-item {
+  background: var(--card); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); margin-bottom: 6px; overflow: hidden;
+  transition: border-color var(--transition-med);
+}
+.faq-item:hover { border-color: var(--border-hover); }
+.faq-q {
+  padding: 16px 20px; font-size: 13px; font-weight: 600;
+  cursor: pointer; user-select: none;
+  display: flex; align-items: center; justify-content: space-between;
+  color: var(--text-secondary); transition: color var(--transition-fast);
+}
+.faq-q:hover { color: var(--text); }
+.faq-q .arrow { font-size: 10px; color: var(--hint); transition: transform var(--transition-med); flex-shrink: 0; }
+.faq-item.open .faq-q .arrow { transform: rotate(180deg); }
+.faq-item.open .faq-q { color: var(--text); }
+.faq-a {
+  max-height: 0; overflow: hidden;
+  transition: max-height 0.35s ease, padding 0.35s ease;
+  padding: 0 20px; font-size: 13px; color: var(--sub); line-height: 1.7;
+}
+.faq-item.open .faq-a { max-height: 200px; padding: 0 20px 18px; }
+
+/* ========== Footer ========== */
+.footer { text-align: center; padding: 32px 0 48px; font-size: 11px; color: var(--hint); letter-spacing: 0.04em; }
+
+#confettiCanvas { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 100; }
+
+@keyframes shake {
+  0%, 100% { transform: translateX(0); }
+  20% { transform: translateX(-6px); }
+  40% { transform: translateX(6px); }
+  60% { transform: translateX(-4px); }
+  80% { transform: translateX(4px); }
+}
+
+@media (max-width: 480px) {
+  .header h1 { font-size: 24px; }
+  .card { padding: 24px 20px; }
+  .radio-group { flex-direction: column; }
+  .btn-submit { height: 58px; font-size: 16px; }
+  .step { padding: 6px 10px; gap: 6px; }
+  .step-text { font-size: 11px; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="confettiCanvas"></canvas>
+
+<div class="page-wrap">
+
+  <!-- ① 브랜드 헤더 -->
+  <div class="brand-header">
+    <div class="brand-logo">
+      <img src="data:image/png;base64,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" alt="체인저스캠퍼스" />
+    </div>
+
+  </div>
+
+  <div class="header">
+    <h1 id="headerTitle"></h1>
+    <div class="subtitle" id="headerDesc"></div>
+  </div>
+
+  <!-- ② 진행 단계 스텝퍼 -->
+  <div class="stepper" id="stepper">
+    <div class="step active" id="step1">
+      <span class="step-num">1</span>
+      <span class="step-text">정보 입력</span>
+    </div>
+    <span class="step-arrow">›</span>
+    <div class="step" id="step2">
+      <span class="step-num">2</span>
+      <span class="step-text">제출</span>
+    </div>
+    <span class="step-arrow">›</span>
+    <div class="step" id="step3">
+      <span class="step-num">3</span>
+      <span class="step-text">리워드</span>
+    </div>
+  </div>
+
+  <!-- 주차별 공지사항 배너 -->
+  <div class="notice-banner" id="noticeBanner">
+    <div class="notice-banner-head">📢 참여 전 반드시 확인해주세요</div>
+    <div class="notice-banner-body" id="noticeBody"></div>
+    <label class="notice-confirm" id="noticeConfirmWrap">
+      <input type="checkbox" id="noticeConfirm" onchange="onNoticeConfirm()">
+      <span>위 공지사항을 확인했습니다</span>
+    </label>
+  </div>
+
+  <!-- 밤샘챌린지 -->
+  <div>
+    <div class="card">
+      <div class="step-label reward">밤샘챌린지</div>
+      <h2>4주차 밤샘챌린지 리워드</h2>
+      <div class="desc">성공/실패 여부를 선택하고 업무일지 링크를 제출하세요.</div>
+
+      <!-- 리워드 구조 안내 -->
+      <div class="reward-preview">
+        <div class="reward-preview-row">
+          <span class="rp-icon">🎉</span>
+          <div class="rp-content">
+            <span class="rp-label">밤샘챌린지 성공</span>
+            <span class="rp-detail">→ 리워드 즉시 다운로드</span>
+          </div>
+        </div>
+        <div class="reward-preview-divider"></div>
+        <div class="reward-preview-row">
+          <span class="rp-icon">💪</span>
+          <div class="rp-content">
+            <span class="rp-label">밤샘챌린지 실패</span>
+            <span class="rp-detail">→ 업무일지 10개 제출 시 리워드 제공</span>
+          </div>
+        </div>
+      </div>
+
+      <div id="challengeForm">
+        <div class="form-field">
+          <label class="form-label">이름 <span class="required">*</span></label>
+          <input type="text" class="form-input" id="cName" placeholder="이름을 입력하세요" autocomplete="name">
+        </div>
+        <div class="form-field">
+          <label class="form-label">연락처 <span class="required">*</span></label>
+          <input type="tel" class="form-input" id="cPhone" placeholder="010-1234-5678" autocomplete="tel" inputmode="tel">
+        </div>
+        <div class="form-field">
+          <label class="form-label">챌린지 결과 <span class="required">*</span></label>
+          <div class="radio-group">
+            <label class="radio-item">
+              <input type="radio" name="cResult" value="성공" onchange="onResultChange()"> <span class="radio-label">🎉 성공했어요</span>
+            </label>
+            <label class="radio-item">
+              <input type="radio" name="cResult" value="실패" onchange="onResultChange()"> <span class="radio-label">💪 실패했어요</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="form-field" id="diaryField" style="display:none;">
+          <label class="form-label">업무일지 링크 <span class="required">*</span></label>
+          <input type="url" class="form-input" id="cDiary" placeholder="업무일지 링크를 붙여넣으세요">
+          <div class="form-hint">톡방에 작성한 업무일지의 링크를 첨부해 주세요.</div>
+        </div>
+
+        <div id="failSection" style="display:none;">
+          <div class="fail-info-box">
+            <div class="fail-info-title">📋 업무일지 10개 제출 시 리워드 제공!</div>
+            <div class="fail-info-desc">밤샘챌린지에 실패하더라도, 업무일지 10개를 작성하여 제출하면 리워드를 받을 수 있습니다.</div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">업무일지 10개를 작성하셨나요? <span class="required">*</span></label>
+            <div class="radio-group">
+              <label class="radio-item">
+                <input type="radio" name="cDiary10" value="yes" onchange="onDiary10Change()"> <span class="radio-label">✅ 네, 10개 작성했어요</span>
+              </label>
+              <label class="radio-item">
+                <input type="radio" name="cDiary10" value="no" onchange="onDiary10Change()"> <span class="radio-label">❌ 아니요</span>
+              </label>
+            </div>
+          </div>
+          <div id="diary10Fields" style="display:none;">
+            <label class="form-label">업무일지 링크 10개 <span class="required">*</span></label>
+            <div class="diary10-list">
+              <div class="diary10-item"><span class="diary10-num">1</span><input type="url" class="form-input diary10-input" placeholder="업무일지 1 링크"></div>
+              <div class="diary10-item"><span class="diary10-num">2</span><input type="url" class="form-input diary10-input" placeholder="업무일지 2 링크"></div>
+              <div class="diary10-item"><span class="diary10-num">3</span><input type="url" class="form-input diary10-input" placeholder="업무일지 3 링크"></div>
+              <div class="diary10-item"><span class="diary10-num">4</span><input type="url" class="form-input diary10-input" placeholder="업무일지 4 링크"></div>
+              <div class="diary10-item"><span class="diary10-num">5</span><input type="url" class="form-input diary10-input" placeholder="업무일지 5 링크"></div>
+              <div class="diary10-item"><span class="diary10-num">6</span><input type="url" class="form-input diary10-input" placeholder="업무일지 6 링크"></div>
+              <div class="diary10-item"><span class="diary10-num">7</span><input type="url" class="form-input diary10-input" placeholder="업무일지 7 링크"></div>
+              <div class="diary10-item"><span class="diary10-num">8</span><input type="url" class="form-input diary10-input" placeholder="업무일지 8 링크"></div>
+              <div class="diary10-item"><span class="diary10-num">9</span><input type="url" class="form-input diary10-input" placeholder="업무일지 9 링크"></div>
+              <div class="diary10-item"><span class="diary10-num">10</span><input type="url" class="form-input diary10-input" placeholder="업무일지 10 링크"></div>
+            </div>
+            <div class="form-hint">업무일지 10개를 모두 제출해야 리워드를 받을 수 있습니다.</div>
+          </div>
+        </div>
+
+        <button class="btn-submit" id="btnSubmit" onclick="submitChallenge()">
+          <span id="btnText">밤샘챌린지 결과 제출하기</span>
+          <span id="btnLoading" style="display:none;">제출 중...</span>
+        </button>
+        <div class="form-error" id="formError"></div>
+      </div>
+
+      <!-- ③ 리워드 쿠폰 카드 -->
+      <div class="reward-coupon" id="rewardResult" style="display:none;">
+        <div class="coupon-card">
+          <div class="coupon-top">
+            <div class="coupon-badge">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+              REWARD UNLOCKED
+            </div>
+            <div class="coupon-icon">🎉</div>
+            <div class="coupon-status">제출이 완료되었습니다!</div>
+            <div class="coupon-title" id="rewardTitle">축하합니다!</div>
+            <div class="coupon-desc" id="rewardDesc"></div>
+            <div class="coupon-guide">리워드는 아래 버튼을 통해 다운로드할 수 있습니다.</div>
+          </div>
+          <div class="coupon-divider">
+            <div class="notch-left"></div>
+            <div class="notch-right"></div>
+          </div>
+          <div class="coupon-bottom">
+            <a class="btn-dl" id="rewardLink" href="#" target="_blank">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+              리워드 다운로드
+            </a>
+            <div class="coupon-footer-text">고생 많으셨습니다, 대표님! 🙌</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 실패 결과 -->
+      <div class="fail-result" id="failResult" style="display:none;">
+        <div style="font-size:44px;margin-bottom:14px;">💪</div>
+        <div class="fail-title">다음 기회에 꼭 성공하세요!</div>
+        <div class="fail-desc">제출이 완료되었습니다. 이번 주에 아쉬웠던 점을 다음 주에 보완해 보세요.</div>
+        <p style="margin-top:18px;font-size:14px;color:var(--sub);">고생 많으셨습니다, 대표님! 🙌</p>
+      </div>
+
+      <div class="abuse-warning">
+        ⚠️ 업무일지 허위 작성 등 어뷰징이 확인될 경우, 해당 기수의 모든 리워드 및 혜택에서 제외될 수 있습니다.
+      </div>
+    </div>
+
+    <div class="faq-section">
+      <div class="faq-title">자주 묻는 질문</div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">밤샘챌린지 리워드는 어떻게 받나요? <span class="arrow">▼</span></div>
+        <div class="faq-a">성공 시: 이름, 연락처, 업무일지 링크 1개를 입력하고 제출하면 리워드 다운로드 링크가 바로 표시됩니다. 실패 시: 업무일지 10개를 작성하여 링크를 모두 제출하면 동일하게 리워드를 받을 수 있습니다.</div>
+      </div>
+      <div class="faq-item">
+        <div class="faq-q" onclick="toggleFaq(this)">제출했는데 리워드 링크가 안 보여요 <span class="arrow">▼</span></div>
+        <div class="faq-a">인터넷 연결을 확인해 주세요. 계속 안 될 경우 체인저스캠퍼스 채널톡으로 문의해 주시면 안내드립니다.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="footer">체인저스캠퍼스</div>
+</div>
+
+<script>
+// ============================================================
+// ★★★ 설정값 — 여기만 수정하면 됩니다 ★★★
+// ============================================================
+const CONFIG = {
+  cohort: "",
+  week: "4주차",
+
+  // ⚠️ GAS 배포 URL을 여기에 붙여넣으세요 (GAS_코드.js 참고)
+  gasUrl: "https://script.google.com/macros/s/AKfycbzI1G4jm99417296Y3VfNISodlL2DxLEO6FMRuecjIw6d3U8rzGfmA66XHDUAKfBtTF/exec",
+
+  // ⚠️ 4주차 리워드 다운로드 링크를 여기에 넣으세요
+  rewardUrl: "https://drive.google.com/drive/folders/1aleBfCzKXx2HCCPHC1Y-ys8lfr_Zot9-?usp=sharing",
+
+  // 공지사항 (빈 문자열이면 배너 숨김)
+  notice: "반드시 강의를 모두 수강하신 후에 리워드를 다운받으셔야 합니다. 강의를 모두 수강하지 않고 리워드를 수령하실 경우 추후 혜택들에서 불이익이 있을 수 있습니다.",
+};
+// ============================================================
+// ★★★ 위 값만 수정하면 페이지 전체가 자동으로 바뀝니다 ★★★
+// ============================================================
+
+
+// --- Stepper 진행 단계 제어 ---
+function setStep(n) {
+  for (let i = 1; i <= 3; i++) {
+    const el = document.getElementById('step' + i);
+    el.classList.remove('active', 'done');
+    if (i < n) el.classList.add('done');
+    else if (i === n) el.classList.add('active');
+    // 완료된 스텝 번호를 체크마크로
+    const numEl = el.querySelector('.step-num');
+    if (i < n) numEl.textContent = '✓';
+    else numEl.textContent = i;
+  }
+}
+
+// --- Confetti Effect ---
+function fireConfetti() {
+  const canvas = document.getElementById('confettiCanvas');
+  const ctx = canvas.getContext('2d');
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  const colors = ['#e8253a','#ff3348','#22c55e','#f59e0b','#fff','#ff6b81'];
+  const particles = [];
+  for (let i = 0; i < 80; i++) {
+    particles.push({
+      x: canvas.width*0.5 + (Math.random()-0.5)*200,
+      y: canvas.height*0.4,
+      vx: (Math.random()-0.5)*12, vy: -Math.random()*14-4,
+      w: Math.random()*8+4, h: Math.random()*6+3,
+      color: colors[Math.floor(Math.random()*colors.length)],
+      rotation: Math.random()*360, rotSpeed: (Math.random()-0.5)*12,
+      gravity: 0.25+Math.random()*0.15, opacity: 1, decay: 0.005+Math.random()*0.008,
+    });
+  }
+  function animate() {
+    ctx.clearRect(0,0,canvas.width,canvas.height);
+    let alive = false;
+    particles.forEach(p => {
+      if(p.opacity<=0) return;
+      alive = true;
+      p.x += p.vx; p.vy += p.gravity; p.y += p.vy;
+      p.rotation += p.rotSpeed; p.opacity -= p.decay; p.vx *= 0.99;
+      ctx.save(); ctx.translate(p.x,p.y); ctx.rotate(p.rotation*Math.PI/180);
+      ctx.globalAlpha = Math.max(0,p.opacity);
+      ctx.fillStyle = p.color; ctx.fillRect(-p.w/2,-p.h/2,p.w,p.h);
+      ctx.restore();
+    });
+    if(alive) requestAnimationFrame(animate);
+  }
+  animate();
+}
+
+
+// --- 페이지 렌더링 ---
+let noticeRequired = false;
+if (CONFIG.notice) {
+  document.getElementById("noticeBanner").classList.add("show");
+  document.getElementById("noticeBody").textContent = CONFIG.notice;
+  noticeRequired = true;
+}
+
+function onNoticeConfirm() {
+  const checked = document.getElementById("noticeConfirm").checked;
+  const submitBtn = document.getElementById("btnSubmit");
+  if (checked) submitBtn.classList.remove("notice-blocked");
+  else submitBtn.classList.add("notice-blocked");
+}
+
+if (noticeRequired) {
+  document.getElementById("btnSubmit").classList.add("notice-blocked");
+}
+
+document.getElementById("headerTitle").textContent = `${CONFIG.week} 밤샘챌린지`;
+document.getElementById("headerDesc").textContent = `밤샘챌린지 미션 완료 후, 아래에서 결과를 제출하고 리워드를 받으세요`;
+document.title = `${CONFIG.week} 밤샘챌린지 — 체인저스캠퍼스`;
+
+
+function onResultChange() {
+  const result = document.querySelector('input[name="cResult"]:checked');
+  const diaryField = document.getElementById("diaryField");
+  const failSection = document.getElementById("failSection");
+  const diary10Fields = document.getElementById("diary10Fields");
+  // 스텝 2로 전환
+  setStep(2);
+  if (result && result.value === "성공") {
+    diaryField.style.display = "block";
+    failSection.style.display = "none";
+    document.querySelectorAll('input[name="cDiary10"]').forEach(r => r.checked = false);
+    diary10Fields.style.display = "none";
+  } else if (result && result.value === "실패") {
+    diaryField.style.display = "none";
+    failSection.style.display = "block";
+  }
+}
+
+function onDiary10Change() {
+  const val = document.querySelector('input[name="cDiary10"]:checked');
+  document.getElementById("diary10Fields").style.display = (val && val.value === "yes") ? "block" : "none";
+}
+
+
+async function submitChallenge() {
+  if (noticeRequired && !document.getElementById("noticeConfirm").checked) {
+    alert("위 공지사항을 확인한 후 시도해 주세요.");
+    document.getElementById("noticeBanner").scrollIntoView({ behavior: "smooth", block: "center" });
+    return;
+  }
+
+  const name = document.getElementById("cName").value.trim();
+  const phone = document.getElementById("cPhone").value.trim();
+  const resultEl = document.querySelector('input[name="cResult"]:checked');
+  const diary = document.getElementById("cDiary").value.trim();
+
+  if (!name) { showError("이름을 입력해 주세요."); return; }
+  if (!phone) { showError("연락처를 입력해 주세요."); return; }
+  if (!resultEl) { showError("챌린지 결과를 선택해 주세요."); return; }
+
+  let diaryLinks = "";
+  let giveReward = false;
+
+  if (resultEl.value === "성공") {
+    if (!diary) { showError("업무일지 링크를 입력해 주세요."); return; }
+    if (!diary.includes("cafe.naver.com")) { showError("올바른 업무일지 링크를 입력해 주세요."); return; }
+    diaryLinks = diary;
+    giveReward = true;
+  } else {
+    const diary10El = document.querySelector('input[name="cDiary10"]:checked');
+    if (!diary10El) { showError("업무일지 10개 작성 여부를 선택해 주세요."); return; }
+    if (diary10El.value === "yes") {
+      const inputs = document.querySelectorAll('.diary10-input');
+      const links = [];
+      for (let i = 0; i < inputs.length; i++) {
+        const val = inputs[i].value.trim();
+        if (!val) { showError(`업무일지 ${i+1}번 링크를 입력해 주세요.`); return; }
+        if (!val.includes("cafe.naver.com")) { showError(`업무일지 ${i+1}번에 올바른 업무일지 링크를 입력해 주세요.`); return; }
+        links.push(val);
+      }
+      // 중복 링크 검사
+      const uniqueLinks = new Set(links);
+      if (uniqueLinks.size !== links.length) {
+        showError("업무일지 링크 중 중복된 링크가 있습니다. 각각 다른 링크를 입력해 주세요.");
+        return;
+      }
+      diaryLinks = links.join(" | ");
+      giveReward = true;
+    }
+  }
+
+  document.getElementById("formError").classList.remove("show");
+
+  const confirmed = confirm("⚠️ 업무일지 허위 작성 등 어뷰징이 확인될 경우, 해당 기수의 모든 리워드 및 혜택에서 제외될 수 있습니다.\n\n제출하시겠습니까?");
+  if (!confirmed) return;
+
+  const btn = document.getElementById("btnSubmit");
+  const btnText = document.getElementById("btnText");
+  const btnLoading = document.getElementById("btnLoading");
+  btn.disabled = true;
+  btnText.style.display = "none";
+  btnLoading.style.display = "inline";
+
+  try {
+    await fetch(CONFIG.gasUrl, {
+      method: "POST", mode: "no-cors",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        cohort: CONFIG.cohort, week: CONFIG.week,
+        name, phone,
+        success: resultEl.value + (resultEl.value === "실패" && giveReward ? " (업무일지 10개)" : ""),
+        diaryLink: diaryLinks
+      })
+    });
+
+    document.getElementById("challengeForm").style.display = "none";
+
+    // 스텝 3 (완료)
+    setStep(3);
+
+    if (giveReward) {
+      document.getElementById("rewardResult").style.display = "block";
+      if (resultEl.value === "성공") {
+        document.getElementById("rewardTitle").textContent = "축하합니다! 챌린지 성공!";
+        document.getElementById("rewardDesc").textContent = `${CONFIG.week} 밤샘챌린지 리워드`;
+      } else {
+        document.getElementById("rewardTitle").textContent = "업무일지 10개 달성!";
+        document.getElementById("rewardDesc").textContent = `${CONFIG.week} 업무일지 10개 달성 리워드`;
+      }
+      document.getElementById("rewardLink").href = CONFIG.rewardUrl || "#";
+      setTimeout(() => fireConfetti(), 200);
+    } else {
+      document.getElementById("failResult").style.display = "block";
+    }
+
+  } catch (err) {
+    showError("오류가 발생했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.");
+    btn.disabled = false;
+    btnText.style.display = "inline";
+    btnLoading.style.display = "none";
+  }
+}
+
+function showError(msg) {
+  const el = document.getElementById("formError");
+  el.textContent = msg;
+  el.classList.add("show");
+  el.style.animation = 'none';
+  el.offsetHeight;
+  el.style.animation = 'shake 0.4s ease';
+}
+
+function toggleFaq(el) {
+  const item = el.parentElement;
+  const section = item.closest('.faq-section');
+  section.querySelectorAll('.faq-item').forEach(other => { if (other !== item) other.classList.remove('open'); });
+  item.classList.toggle("open");
+}
+</script>
+</body>
+</html>
+
