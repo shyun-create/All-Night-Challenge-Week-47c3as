@@ -933,9 +933,10 @@ async function submitChallenge() {
   btnLoading.style.display = "inline";
 
   try {
-    await fetch(CONFIG.gasUrl, {
-      method: "POST", mode: "no-cors",
-      headers: { "Content-Type": "application/json" },
+    const response = await fetch(CONFIG.gasUrl, {
+      method: "POST",
+      redirect: "follow",
+      headers: { "Content-Type": "text/plain" },
       body: JSON.stringify({
         cohort: CONFIG.cohort, week: CONFIG.week,
         name, phone,
@@ -943,6 +944,12 @@ async function submitChallenge() {
         diaryLink: diaryLinks
       })
     });
+
+    // GAS 응답 확인 — 실제로 스프레드시트에 기록되었는지 검증
+    const result = await response.json();
+    if (result.status !== "ok") {
+      throw new Error(result.message || "서버에 데이터를 저장하지 못했습니다.");
+    }
 
     document.getElementById("challengeForm").style.display = "none";
 
