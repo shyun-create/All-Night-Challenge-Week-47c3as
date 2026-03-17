@@ -786,9 +786,6 @@ const CONFIG = {
   // ⚠️ GAS 배포 URL을 여기에 붙여넣으세요
   gasUrl: "https://script.google.com/macros/s/AKfycbzQdRQ7uPoc10lzC9287HQ7ud5pQy9a3GJlKJdWjsjlbwe3n6jSflk-I9xpXZiISmcG/exec",
 
-  // 주차별 리워드 URL
-  rewardUrl: "https://drive.google.com/drive/folders/1aleBfCzKXx2HCCPHC1Y-ys8lfr_Zot9-?usp=sharing",
-
   // 공지사항 (빈 문자열이면 배너 숨김)
   notice: "반드시 강의를 모두 수강하신 후에 리워드를 다운받으셔야 합니다. 강의를 모두 수강하지 않고 리워드를 수령하실 경우 추후 혜택들에서 불이익이 있을 수 있습니다.",
 };
@@ -962,25 +959,59 @@ async function submitChallenge() {
 
   const submissionId = crypto.randomUUID ? crypto.randomUUID() : (Date.now().toString(36) + Math.random().toString(36).slice(2));
 
-  try {
-    // POST로 데이터 전송 (no-cors)
-    await fetch(CONFIG.gasUrl, {
-      method: "POST", mode: "no-cors",
-      headers: { "Content-Type": "text/plain" },
-      body: JSON.stringify({
-        submissionId,
-        cohort, week: CONFIG.week,
-        name, phone, email,
-        success: resultEl.value + (resultEl.value === "실패" && giveReward ? " (업무일지 10개)" : ""),
-        diaryLink: diaryLinks
-      })
-    });
+  const payload = JSON.stringify({
+    submissionId,
+    cohort, week: CONFIG.week,
+    name, phone, email,
+    success: resultEl.value + (resultEl.value === "실패" && giveReward ? " (업무일지 10개)" : ""),
+    diaryLink: diaryLinks
+  });
 
-    // POST 전송 후 결과 화면 표시
+  // hidden iframe + form POST → GAS가 postMessage로 응답
+  const iframeName = '_submitFrame_' + Date.now();
+  const iframe = document.createElement('iframe');
+  iframe.name = iframeName;
+  iframe.style.display = 'none';
+  document.body.appendChild(iframe);
+
+  // 타임아웃 (15초)
+  const timeout = setTimeout(() => {
+    cleanup();
+    showError("서버 응답 시간이 초과되었습니다. 다시 시도해 주세요.");
+    btn.disabled = false;
+    btnText.style.display = "inline";
+    btnLoading.style.display = "none";
+  }, 15000);
+
+  function cleanup() {
+    clearTimeout(timeout);
+    window.removeEventListener('message', onMessage);
+    if (iframe.parentNode) iframe.parentNode.removeChild(iframe);
+  }
+
+  function onMessage(event) {
+    // GAS 응답인지 확인
+    let response;
+    try {
+      response = (typeof event.data === 'string') ? JSON.parse(event.data) : event.data;
+    } catch (e) { return; }
+    if (!response || !response.status) return;
+
+    cleanup();
+
+    if (response.status === "error") {
+      showError(response.message || "서버 오류가 발생했습니다.");
+      btn.disabled = false;
+      btnText.style.display = "inline";
+      btnLoading.style.display = "none";
+      return;
+    }
+
+    // 성공 처리
     document.getElementById("challengeForm").style.display = "none";
     setStep(3);
 
-    if (giveReward) {
+    if (giveReward && response.rewardUrl) {
       document.getElementById("rewardResult").style.display = "block";
       if (resultEl.value === "성공") {
         document.getElementById("rewardTitle").textContent = "축하합니다! 챌린지 성공!";
@@ -989,18 +1020,28 @@ async function submitChallenge() {
         document.getElementById("rewardTitle").textContent = "업무일지 10개 달성!";
         document.getElementById("rewardDesc").textContent = `${CONFIG.week} 업무일지 10개 달성 리워드`;
       }
-      document.getElementById("rewardLink").href = CONFIG.rewardUrl;
+      document.getElementById("rewardLink").href = response.rewardUrl;
       setTimeout(() => fireConfetti(), 200);
     } else {
       document.getElementById("failResult").style.display = "block";
     }
-
-  } catch (err) {
-    showError("오류가 발생했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.");
-    btn.disabled = false;
-    btnText.style.display = "inline";
-    btnLoading.style.display = "none";
   }
+
+  window.addEventListener('message', onMessage);
+
+  // form POST → hidden iframe
+  const form = document.createElement('form');
+  form.method = 'POST';
+  form.action = CONFIG.gasUrl;
+  form.target = iframeName;
+  const input = document.createElement('input');
+  input.type = 'hidden';
+  input.name = 'payload';
+  input.value = payload;
+  form.appendChild(input);
+  document.body.appendChild(form);
+  form.submit();
+  form.remove();
 }
 
 
